@@ -3,9 +3,14 @@ import iView from 'iview';
 import VueRouter from 'vue-router';
 import Routers from './router';
 
+import Mock from './mock';
+//  启动Mock
+Mock.bootstrap();
+
 import Util from './libs/util';
 import App from './app.vue';
-import 'iview/dist/styles/iview.css';
+import '../my-theme/dist/iview.css';
+
 
 import VueI18n from 'vue-i18n';
 import Locales from './locale';
@@ -40,16 +45,23 @@ const RouterConfig = {
 const router = new VueRouter(RouterConfig);
 
 router.beforeEach((to, from, next) => {
+    if (to.path == '/login') {
+        sessionStorage.removeItem('user');
+    }
+    let user = JSON.parse(sessionStorage.getItem('user'));
     iView.LoadingBar.start();
     Util.title(to.meta.title);
-    next();
+    if (!user && to.path != '/login') {
+        next({path: '/login'});
+    } else {
+        next();
+    }
 });
 
 router.afterEach(() => {
     iView.LoadingBar.finish();
     window.scrollTo(0, 0);
 });
-
 
 
 new Vue({
